@@ -6,188 +6,98 @@
 <title>PressLite — 智能图片压缩</title>
 <style>
   :root {
-    --bg: #0d1117;
-    --surface: #161b22;
-    --border: #30363d;
-    --text: #c9d1d9;
-    --muted: #8b949e;
-    --accent: #58a6ff;
-    --accent2: #3fb950;
-    --danger: #f85149;
-    --orange: #d2991d;
-    --radius: 12px;
-    --shadow: 0 0 0 1px var(--border), 0 8px 24px rgba(0,0,0,.4);
+    --bg: #0d1117; --surface: #161b22; --border: #30363d; --text: #c9d1d9;
+    --muted: #8b949e; --accent: #58a6ff; --accent2: #3fb950; --danger: #f85149;
+    --orange: #d2991d; --radius: 12px; --shadow: 0 0 0 1px var(--border), 0 8px 24px rgba(0,0,0,.4);
   }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  /* ── nav ── */
-  nav {
-    width: 100%; max-width: 1200px;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 20px 32px;
-  }
-  .logo { font-size: 22px; font-weight: 700; letter-spacing: -.5px; }
-  .logo span { color: var(--accent); }
-  .nav-links { display: flex; gap: 24px; }
-  .nav-links a { color: var(--muted); text-decoration: none; font-size: 14px; }
-  .nav-links a:hover { color: var(--text); }
-  .btn { padding: 8px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: .15s; }
-  .btn-primary { background: var(--accent); color: #fff; }
-  .btn-primary:hover { filter: brightness(1.15); }
-  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
-  .btn-outline:hover { background: var(--surface); }
-
-  /* ── hero ── */
-  .hero { text-align: center; padding: 48px 20px 20px; }
-  .hero h1 { font-size: 40px; font-weight: 800; letter-spacing: -1px; line-height: 1.2; }
-  .hero h1 span { background: linear-gradient(135deg, var(--accent), #a371f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  .hero p { color: var(--muted); font-size: 17px; margin-top: 12px; max-width: 540px; margin-inline: auto; }
-
-  /* ── stats ── */
-  .stats { display: flex; gap: 32px; justify-content: center; margin-top: 24px; }
-  .stat { text-align: center; }
-  .stat .num { font-size: 28px; font-weight: 700; color: var(--accent2); }
-  .stat .label { font-size: 12px; color: var(--muted); margin-top: 2px; }
-
-  /* ── main card ── */
-  .main-card {
-    width: 100%; max-width: 900px;
-    background: var(--surface);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 32px;
-    margin-top: 12px;
-  }
-
-  /* ── upload zone ── */
-  .upload-zone {
-    border: 2px dashed var(--border);
-    border-radius: var(--radius);
-    padding: 48px;
-    text-align: center;
-    cursor: pointer;
-    transition: .2s;
-    position: relative;
-  }
-  .upload-zone:hover, .upload-zone.drag-over { border-color: var(--accent); background: rgba(88,166,255,.04); }
-  .upload-zone .icon { font-size: 48px; margin-bottom: 12px; }
-  .upload-zone h3 { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
-  .upload-zone p { color: var(--muted); font-size: 13px; }
-  .upload-zone input { display: none; }
-
-  /* ── file queue ── */
-  .file-queue { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
-  .file-item {
-    display: flex; align-items: center; gap: 14px;
-    background: var(--bg); border-radius: 10px; padding: 14px 18px;
-    border: 1px solid var(--border);
-  }
-  .file-thumb { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; background: var(--surface); }
-  .file-info { flex: 1; min-width: 0; }
-  .file-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .file-meta { display: flex; gap: 16px; margin-top: 4px; font-size: 12px; color: var(--muted); }
-  .file-size-original { text-decoration: line-through; }
-  .file-size-compressed { color: var(--accent2); font-weight: 600; }
-  .file-status { display: flex; align-items: center; gap: 6px; font-size: 13px; }
-  .file-status.done { color: var(--accent2); }
-  .file-status.processing { color: var(--orange); }
-  .badge { font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 600; }
-  .badge-saved { background: rgba(63,185,80,.15); color: var(--accent2); }
-  .btn-sm { padding: 6px 14px; font-size: 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; }
-  .btn-sm:hover { background: var(--bg); }
-  .btn-sm.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-
-  /* ── controls ── */
-  .controls {
-    display: flex; gap: 20px; align-items: center; flex-wrap: wrap;
-    padding: 16px 0; border-top: 1px solid var(--border); margin-top: 20px;
-  }
-  .control-group { display: flex; align-items: center; gap: 10px; }
-  .control-group label { font-size: 13px; color: var(--muted); white-space: nowrap; }
-  .control-group input[type=range] {
-    width: 140px; accent-color: var(--accent);
-  }
-  .control-group .val { font-size: 13px; font-weight: 600; color: var(--accent); min-width: 36px; }
-  .control-group select {
-    background: var(--bg); color: var(--text); border: 1px solid var(--border);
-    border-radius: 6px; padding: 6px 12px; font-size: 13px;
-  }
-
-  .compress-all {
-    margin-left: auto;
-    padding: 10px 28px; font-size: 14px; font-weight: 700;
-    background: var(--accent2); color: #fff; border: none; border-radius: 8px; cursor: pointer;
-    transition: .15s;
-  }
-  .compress-all:hover { filter: brightness(1.15); }
-  .compress-all:disabled { opacity: .4; cursor: not-allowed; }
-
-  /* ── compare modal ── */
-  .modal-overlay {
-    display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7);
-    z-index: 100; align-items: center; justify-content: center;
-  }
-  .modal-overlay.active { display: flex; }
-  .modal {
-    background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow);
-    padding: 32px; max-width: 800px; width: 90%; max-height: 85vh; overflow-y: auto;
-  }
-  .modal h3 { font-size: 20px; margin-bottom: 20px; }
-  .compare-container { display: flex; gap: 20px; }
-  .compare-side { flex: 1; text-align: center; }
-  .compare-side img { max-width: 100%; border-radius: 8px; border: 1px solid var(--border); }
-  .compare-side .label { font-size: 13px; color: var(--muted); margin-top: 8px; }
-  .compare-side .size { font-size: 16px; font-weight: 700; margin-top: 2px; }
-  .modal-close { float: right; background: none; border: none; color: var(--muted); font-size: 24px; cursor: pointer; }
-
-  /* ── footer ── */
-  footer { margin-top: 48px; padding: 24px; text-align: center; color: var(--muted); font-size: 13px; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center}
+  nav{width:100%;max-width:1200px;display:flex;align-items:center;justify-content:space-between;padding:20px 32px}
+  .logo{font-size:22px;font-weight:700;letter-spacing:-.5px}
+  .logo span{color:var(--accent)}
+  .nav-links{display:flex;gap:24px}
+  .nav-links a{color:var(--muted);text-decoration:none;font-size:14px}
+  .nav-links a:hover{color:var(--text)}
+  .btn{padding:8px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:.15s}
+  .btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{filter:brightness(1.15)}
+  .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+  .btn-outline:hover{background:var(--surface)}
+  .hero{text-align:center;padding:48px 20px 20px}
+  .hero h1{font-size:40px;font-weight:800;letter-spacing:-1px;line-height:1.2}
+  .hero h1 span{background:linear-gradient(135deg,var(--accent),#a371f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .hero p{color:var(--muted);font-size:17px;margin-top:12px;max-width:540px;margin-inline:auto}
+  .stats{display:flex;gap:32px;justify-content:center;margin-top:24px}
+  .stat{text-align:center}.stat .num{font-size:28px;font-weight:700;color:var(--accent2)}.stat .label{font-size:12px;color:var(--muted);margin-top:2px}
+  .main-card{width:100%;max-width:900px;background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:32px;margin-top:12px}
+  .upload-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:48px;text-align:center;cursor:pointer;transition:.2s;display:block}
+  .upload-zone:hover,.upload-zone.drag-over{border-color:var(--accent);background:rgba(88,166,255,.04)}
+  .upload-zone .icon{font-size:48px;margin-bottom:12px}
+  .upload-zone h3{font-size:18px;font-weight:600;margin-bottom:6px}
+  .upload-zone p{color:var(--muted);font-size:13px}
+  .file-queue{margin-top:20px;display:flex;flex-direction:column;gap:10px}
+  .file-item{display:flex;align-items:center;gap:14px;background:var(--bg);border-radius:10px;padding:14px 18px;border:1px solid var(--border)}
+  .file-thumb{width:48px;height:48px;border-radius:8px;object-fit:cover;background:var(--surface);flex-shrink:0}
+  .file-info{flex:1;min-width:0}
+  .file-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .file-meta{display:flex;gap:16px;margin-top:4px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+  .file-size-original{text-decoration:line-through}
+  .file-size-compressed{color:var(--accent2);font-weight:600}
+  .file-status{display:flex;align-items:center;gap:6px;font-size:13px;white-space:nowrap}
+  .file-status.done{color:var(--accent2)}.file-status.processing{color:var(--orange)}.file-status.error{color:var(--danger)}
+  .badge{font-size:11px;padding:3px 8px;border-radius:20px;font-weight:600}
+  .badge-saved{background:rgba(63,185,80,.15);color:var(--accent2)}
+  .btn-sm{padding:6px 14px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;white-space:nowrap}
+  .btn-sm:hover{background:var(--bg)}.btn-sm.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  .controls{display:flex;gap:20px;align-items:center;flex-wrap:wrap;padding:16px 0;border-top:1px solid var(--border);margin-top:20px}
+  .control-group{display:flex;align-items:center;gap:10px}
+  .control-group label{font-size:13px;color:var(--muted);white-space:nowrap}
+  .control-group input[type=range]{width:140px;accent-color:var(--accent)}
+  .control-group .val{font-size:13px;font-weight:600;color:var(--accent);min-width:36px}
+  .control-group select{background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:13px}
+  .compress-all{margin-left:auto;padding:10px 28px;font-size:14px;font-weight:700;background:var(--accent2);color:#fff;border:none;border-radius:8px;cursor:pointer;transition:.15s}
+  .compress-all:hover{filter:brightness(1.15)}
+  .compress-all:disabled{opacity:.4;cursor:not-allowed}
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center}
+  .modal-overlay.active{display:flex}
+  .modal{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:32px;max-width:800px;width:90%;max-height:85vh;overflow-y:auto}
+  .modal h3{font-size:20px;margin-bottom:20px}
+  .compare-container{display:flex;gap:20px;align-items:flex-start}
+  .compare-side{flex:1;text-align:center}
+  .compare-side img{max-width:100%;border-radius:8px;border:1px solid var(--border)}
+  .compare-side .label{font-size:13px;color:var(--muted);margin-top:8px}
+  .compare-side .size{font-size:16px;font-weight:700;margin-top:2px}
+  .modal-close{float:right;background:none;border:none;color:var(--muted);font-size:24px;cursor:pointer}
+  footer{margin-top:48px;padding:24px;text-align:center;color:var(--muted);font-size:13px}
 </style>
 </head>
 <body>
 
-<!-- NAV -->
 <nav>
   <div class="logo">Press<span>Lite</span></div>
-  <div class="nav-links">
-    <a href="#">功能</a>
-    <a href="#">定价</a>
-    <a href="#">API</a>
-    <a href="#">文档</a>
-  </div>
+  <div class="nav-links"><a href="#">功能</a><a href="#">定价</a><a href="#">API</a><a href="#">文档</a></div>
   <button class="btn btn-outline" onclick="resetAll()">清空列表</button>
 </nav>
 
-<!-- HERO -->
 <div class="hero">
   <h1>拖入图片，<span>智能压缩</span></h1>
   <p>基于 WebP/AVIF 的自适应压缩引擎，体积减少 80% 肉眼几乎无损。支持批量处理，完全在浏览器端运行，文件不上传服务器。</p>
   <div class="stats">
-    <div class="stat"><div class="num" id="totalSaved">0 MB</div><div class="label">已节省</div></div>
+    <div class="stat"><div class="num" id="totalSaved">0 B</div><div class="label">已节省</div></div>
     <div class="stat"><div class="num" id="avgRatio">0%</div><div class="label">平均压缩率</div></div>
     <div class="stat"><div class="num" id="fileCount">0</div><div class="label">已处理文件</div></div>
   </div>
 </div>
 
-<!-- MAIN CARD -->
 <div class="main-card">
-  <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+
+  <input type="file" id="fileInput" accept="image/*" multiple style="display:none">
+
+  <label class="upload-zone" id="uploadZone" for="fileInput">
     <div class="icon">&#128229;</div>
     <h3>拖拽图片到此处，或点击上传</h3>
     <p>支持 JPG / PNG / WebP / AVIF / BMP &nbsp;|&nbsp; 单文件最大 50MB &nbsp;|&nbsp; 支持批量</p>
-    <input type="file" id="fileInput" accept="image/*" multiple onchange="handleFiles(this.files)">
-  </div>
+  </label>
 
-  <!-- CONTROLS -->
   <div class="controls">
     <div class="control-group">
       <label>压缩质量</label>
@@ -196,37 +106,22 @@
     </div>
     <div class="control-group">
       <label>输出格式</label>
-      <select id="format" onchange="updateFormatLabel()">
-        <option value="auto">自动（最优）</option>
-        <option value="webp">WebP</option>
-        <option value="jpeg">JPEG</option>
-        <option value="png">PNG</option>
-        <option value="avif">AVIF</option>
-      </select>
+      <select id="format"><option value="auto">自动（最优）</option><option value="webp">WebP</option><option value="jpeg">JPEG</option><option value="png">PNG</option><option value="avif">AVIF</option></select>
     </div>
     <div class="control-group">
       <label>最大宽度</label>
-      <select id="maxWidth">
-        <option value="0">原始尺寸</option>
-        <option value="4096">4096px</option>
-        <option value="2048" selected>2048px</option>
-        <option value="1024">1024px</option>
-        <option value="800">800px</option>
-      </select>
+      <select id="maxWidth"><option value="0">原始尺寸</option><option value="4096">4096px</option><option value="2048" selected>2048px</option><option value="1024">1024px</option><option value="800">800px</option></select>
     </div>
     <button class="compress-all" id="compressAllBtn" onclick="compressAll()" disabled>压缩全部文件</button>
   </div>
 
-  <!-- FILE QUEUE -->
-  <div class="file-queue" id="fileQueue">
-    <div style="text-align:center;color:var(--muted);padding:32px;font-size:14px;" id="emptyHint">
-      还没有添加文件，拖拽图片到上方区域开始压缩
-    </div>
+  <div class="file-queue" id="fileQueue"></div>
+  <div style="text-align:center;color:var(--muted);padding:32px;font-size:14px" id="emptyHint">
+    还没有添加文件，拖拽图片到上方区域开始压缩
   </div>
 </div>
 
-<!-- COMPARE MODAL -->
-<div class="modal-overlay" id="compareModal" onclick="if(event.target===this)closeModal()">
+<div class="modal-overlay" id="compareModal">
   <div class="modal">
     <button class="modal-close" onclick="closeModal()">&times;</button>
     <h3>压缩对比</h3>
@@ -234,222 +129,255 @@
   </div>
 </div>
 
-<footer>
-  PressLite &middot; 浏览器端即时压缩 &middot; 文件不会离开你的设备
-</footer>
+<footer>PressLite &middot; 浏览器端即时压缩 &middot; 文件不会离开你的设备</footer>
 
 <script>
-  const files = []
-  let totalSavedBytes = 0
-  let totalOriginalBytes = 0
+const files = [];
+let totalSavedBytes = 0;
+let totalOriginalBytes = 0;
 
-  const uploadZone = document.getElementById('uploadZone')
-  uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over') })
-  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'))
-  uploadZone.addEventListener('drop', e => {
-    e.preventDefault()
-    uploadZone.classList.remove('drag-over')
-    handleFiles(e.dataTransfer.files)
-  })
+// ---- Upload ----
+const uploadZone = document.getElementById('uploadZone');
+const fileInput = document.getElementById('fileInput');
 
-  function handleFiles(fileList) {
-    for (const f of fileList) {
-      if (!f.type.startsWith('image/')) continue
-      const id = Date.now() + Math.random()
-      files.push({ id, file: f, originalSize: f.size, compressed: null, status: 'pending' })
-    }
-    renderQueue()
+fileInput.addEventListener('change', function() {
+  if (this.files && this.files.length > 0) {
+    handleFiles(this.files);
+    this.value = ''; // reset so same file can be re-uploaded
   }
+});
 
-  function renderQueue() {
-    const q = document.getElementById('fileQueue')
-    const hint = document.getElementById('emptyHint')
-    if (files.length === 0) {
-      q.innerHTML = ''
-      q.appendChild(hint)
-      hint.style.display = ''
-      document.getElementById('compressAllBtn').disabled = true
-    } else {
-      hint.style.display = 'none'
-      q.innerHTML = files.map(f => {
-        const url = f.file ? URL.createObjectURL(f.file) : ''
-        const orig = formatBytes(f.originalSize)
-        const comp = f.compressed ? formatBytes(f.compressed.size) : '—'
-        const saved = f.compressed ? formatBytes(f.originalSize - f.compressed.size) : '—'
-        const pct = f.compressed ? Math.round((1 - f.compressed.size / f.originalSize) * 100) : 0
-        const statusClass = f.status === 'done' ? 'done' : f.status === 'processing' ? 'processing' : ''
-        const statusText = f.status === 'done' ? '已完成' : f.status === 'processing' ? '压缩中…' : '等待中'
-        return `
-          <div class="file-item">
-            <img class="file-thumb" src="${url}" alt="">
-            <div class="file-info">
-              <div class="file-name">${f.file.name}</div>
-              <div class="file-meta">
-                <span>原图 <span class="file-size-original">${orig}</span></span>
-                ${f.compressed ? `<span>压缩后 <span class="file-size-compressed">${comp}</span></span>` : ''}
-                ${f.compressed ? `<span class="badge badge-saved">-${pct}% (${saved})</span>` : ''}
-              </div>
-            </div>
-            <div class="file-status ${statusClass}">
-              ${f.status === 'done' ? '&#10003; ' + statusText : f.status === 'processing' ? '&#8987; ' + statusText : statusText}
-            </div>
-            ${f.compressed ? `<button class="btn-sm primary" onclick="downloadOne('${f.id}')">下载</button>` : ''}
-            ${f.compressed ? `<button class="btn-sm" onclick="compareOne('${f.id}')">对比</button>` : ''}
-            <button class="btn-sm" onclick="removeOne('${f.id}')" style="color:var(--danger)">&#10005;</button>
-          </div>
-        `
-      }).join('')
-      document.getElementById('compressAllBtn').disabled = files.every(f => f.status === 'done')
-    }
-    updateStats()
+uploadZone.addEventListener('dragover', function(e) {
+  e.preventDefault();
+  uploadZone.classList.add('drag-over');
+});
+uploadZone.addEventListener('dragleave', function() {
+  uploadZone.classList.remove('drag-over');
+});
+uploadZone.addEventListener('drop', function(e) {
+  e.preventDefault();
+  uploadZone.classList.remove('drag-over');
+  if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+    handleFiles(e.dataTransfer.files);
   }
+});
 
-  async function compressAll() {
-    const pending = files.filter(f => f.status === 'pending' && f.file)
-    if (pending.length === 0) return
-
-    const quality = parseInt(document.getElementById('quality').value) / 100
-    const format = document.getElementById('format').value
-    const maxWidth = parseInt(document.getElementById('maxWidth').value)
-
-    for (const f of pending) {
-      f.status = 'processing'
-      renderQueue()
-      await sleep(300) // simulate processing
-      try {
-        const compressed = await compressImage(f.file, quality, format, maxWidth)
-        f.compressed = compressed
-        f.status = 'done'
-        totalSavedBytes += f.originalSize - compressed.size
-        totalOriginalBytes += f.originalSize
-      } catch (e) {
-        f.status = 'pending'
-        console.error(e)
-      }
-      renderQueue()
-    }
+function handleFiles(fileList) {
+  for (var i = 0; i < fileList.length; i++) {
+    var f = fileList[i];
+    if (!f.type || !f.type.startsWith('image/')) continue;
+    files.push({
+      id: Date.now() + '_' + Math.random().toString(36).slice(2),
+      file: f,
+      originalSize: f.size,
+      compressed: null,
+      status: 'pending'
+    });
   }
+  renderQueue();
+}
 
-  async function compressImage(file, quality, format, maxWidth) {
-    const img = await loadImage(file)
-    const canvas = document.createElement('canvas')
-    let w = img.naturalWidth, h = img.naturalHeight
+// ---- Render ----
+function renderQueue() {
+  var q = document.getElementById('fileQueue');
+  var hint = document.getElementById('emptyHint');
+  if (files.length === 0) {
+    q.innerHTML = '';
+    hint.style.display = '';
+    document.getElementById('compressAllBtn').disabled = true;
+  } else {
+    hint.style.display = 'none';
+    q.innerHTML = files.map(function(f) {
+      var url = f.file ? URL.createObjectURL(f.file) : '';
+      var orig = formatBytes(f.originalSize);
+      var comp = f.compressed ? formatBytes(f.compressed.size) : '—';
+      var saved = f.compressed ? formatBytes(f.originalSize - f.compressed.size) : '—';
+      var pct = f.compressed ? Math.round((1 - f.compressed.size / f.originalSize) * 100) : 0;
+      var sc = f.status === 'done' ? 'done' : f.status === 'processing' ? 'processing' : f.status === 'error' ? 'error' : '';
+      var st = f.status === 'done' ? '已完成' : f.status === 'processing' ? '压缩中…' : f.status === 'error' ? '失败' : '等待中';
+      return '<div class="file-item">' +
+        '<img class="file-thumb" src="' + url + '" alt="">' +
+        '<div class="file-info">' +
+          '<div class="file-name">' + f.file.name + '</div>' +
+          '<div class="file-meta">' +
+            '<span>原图 <span class="file-size-original">' + orig + '</span></span>' +
+            (f.compressed ? '<span>压缩后 <span class="file-size-compressed">' + comp + '</span></span>' : '') +
+            (f.compressed ? '<span class="badge badge-saved">-' + pct + '% (' + saved + ')</span>' : '') +
+          '</div>' +
+        '</div>' +
+        '<div class="file-status ' + sc + '">' + (f.status === 'done' ? '&#10003; ' : f.status === 'processing' ? '&#8987; ' : '') + st + '</div>' +
+        (f.compressed ? '<button class="btn-sm primary" data-id="' + f.id + '" onclick="downloadOne(this)">下载</button>' : '') +
+        (f.compressed ? '<button class="btn-sm" data-id="' + f.id + '" onclick="compareOne(this)">对比</button>' : '') +
+        '<button class="btn-sm" data-id="' + f.id + '" onclick="removeOne(this)" style="color:var(--danger)">&#10005;</button>' +
+      '</div>';
+    }).join('');
+    var hasPending = files.some(function(f) { return f.status === 'pending'; });
+    document.getElementById('compressAllBtn').disabled = !hasPending;
+  }
+  updateStats();
+}
+
+function updateStats() {
+  document.getElementById('totalSaved').textContent = formatBytes(totalSavedBytes);
+  var pct = totalOriginalBytes > 0 ? Math.round(totalSavedBytes / totalOriginalBytes * 100) : 0;
+  document.getElementById('avgRatio').textContent = pct + '%';
+  document.getElementById('fileCount').textContent = files.filter(function(f) { return f.status === 'done'; }).length;
+}
+
+// ---- Compression ----
+function compressAll() {
+  var pending = files.filter(function(f) { return f.status === 'pending' && f.file; });
+  if (pending.length === 0) return;
+  var quality = parseInt(document.getElementById('quality').value) / 100;
+  var format = document.getElementById('format').value;
+  var maxWidth = parseInt(document.getElementById('maxWidth').value);
+
+  pending.forEach(function(f) { f.status = 'processing'; });
+  renderQueue();
+
+  var promises = pending.map(function(f) {
+    return compressImage(f.file, quality, format, maxWidth).then(function(result) {
+      f.compressed = result;
+      f.status = 'done';
+      totalSavedBytes += f.originalSize - result.size;
+      totalOriginalBytes += f.originalSize;
+    }).catch(function(err) {
+      console.error('Compress failed for ' + f.file.name, err);
+      f.status = 'error';
+    }).then(function() {
+      renderQueue();
+    });
+  });
+
+  Promise.all(promises).then(function() {
+    renderQueue();
+  });
+}
+
+function compressImage(file, quality, format, maxWidth) {
+  return loadImage(file).then(function(img) {
+    var canvas = document.createElement('canvas');
+    var w = img.naturalWidth;
+    var h = img.naturalHeight;
     if (maxWidth > 0 && w > maxWidth) {
-      h = Math.round(h * maxWidth / w)
-      w = maxWidth
+      h = Math.round(h * maxWidth / w);
+      w = maxWidth;
     }
-    canvas.width = w; canvas.height = h
-    const ctx = canvas.getContext('2d')
-    ctx.drawImage(img, 0, 0, w, h)
+    canvas.width = w;
+    canvas.height = h;
+    var ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, w, h);
 
-    let mime = 'image/webp'
-    if (format === 'jpeg') mime = 'image/jpeg'
-    else if (format === 'png') mime = 'image/png'
-    else if (format === 'avif') mime = 'image/avif'
+    var mime = 'image/webp';
+    if (format === 'jpeg') mime = 'image/jpeg';
+    else if (format === 'png') mime = 'image/png';
+    else if (format === 'avif') mime = 'image/avif';
     else if (format === 'auto') {
-      if (file.type === 'image/png') mime = 'image/png'
-      else mime = 'image/webp'
+      mime = (file.type === 'image/png') ? 'image/png' : 'image/webp';
     }
 
-    return new Promise((resolve, reject) => {
-      canvas.toBlob(blob => {
-        if (!blob) return reject('compress failed')
-        resolve({ blob, size: blob.size, mime, width: w, height: h, url: URL.createObjectURL(blob) })
-      }, mime, quality)
-    })
+    return new Promise(function(resolve, reject) {
+      canvas.toBlob(function(blob) {
+        if (!blob) return reject(new Error('toBlob returned null'));
+        resolve({
+          blob: blob,
+          size: blob.size,
+          mime: mime,
+          width: w,
+          height: h,
+          url: URL.createObjectURL(blob)
+        });
+      }, mime, quality);
+    });
+  });
+}
+
+function loadImage(file) {
+  return new Promise(function(resolve, reject) {
+    var img = new Image();
+    img.onload = function() { resolve(img); };
+    img.onerror = function() { reject(new Error('Failed to load image')); };
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+// ---- Actions ----
+function downloadOne(el) {
+  var id = el.getAttribute('data-id');
+  var f = files.find(function(x) { return x.id === id; });
+  if (!f || !f.compressed) return;
+  var ext = f.compressed.mime.split('/')[1].replace('jpeg','jpg');
+  var name = f.file.name.replace(/\.[^.]+$/, '') + '_compressed.' + ext;
+  var a = document.createElement('a');
+  a.href = f.compressed.url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function compareOne(el) {
+  var id = el.getAttribute('data-id');
+  var f = files.find(function(x) { return x.id === id; });
+  if (!f || !f.compressed) return;
+  var content = document.getElementById('compareContent');
+  var origUrl = URL.createObjectURL(f.file);
+  var origSize = formatBytes(f.originalSize);
+  var compSize = formatBytes(f.compressed.size);
+  var pct = Math.round((1 - f.compressed.size / f.originalSize) * 100);
+  content.innerHTML =
+    '<div class="compare-side">' +
+      '<img src="' + origUrl + '" alt="原图"><div class="label">原图</div>' +
+      '<div class="size">' + origSize + '</div><div style="color:var(--muted);font-size:12px">' + f.file.name + '</div>' +
+    '</div>' +
+    '<div style="display:flex;align-items:center;font-size:32px;color:var(--accent2);flex-shrink:0">&#10142;</div>' +
+    '<div class="compare-side">' +
+      '<img src="' + f.compressed.url + '" alt="压缩后"><div class="label">压缩后</div>' +
+      '<div class="size" style="color:var(--accent2)">' + compSize + '</div>' +
+      '<div style="color:var(--accent2);font-size:13px;font-weight:600">节省 ' + pct + '%</div>' +
+    '</div>';
+  document.getElementById('compareModal').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('compareModal').classList.remove('active');
+}
+document.getElementById('compareModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+function removeOne(el) {
+  var id = el.getAttribute('data-id');
+  var idx = -1;
+  for (var i = 0; i < files.length; i++) { if (files[i].id === id) { idx = i; break; } }
+  if (idx === -1) return;
+  var f = files[idx];
+  if (f.status === 'done') {
+    totalSavedBytes -= (f.originalSize - f.compressed.size);
+    totalOriginalBytes -= f.originalSize;
   }
+  files.splice(idx, 1);
+  renderQueue();
+}
 
-  function loadImage(file) {
-    return new Promise((resolve, reject) => {
-      const img = new Image()
-      img.onload = () => resolve(img)
-      img.onerror = reject
-      img.src = URL.createObjectURL(file)
-    })
-  }
+function resetAll() {
+  files.length = 0;
+  totalSavedBytes = 0;
+  totalOriginalBytes = 0;
+  renderQueue();
+}
 
-  function downloadOne(id) {
-    const f = files.find(x => x.id == id)
-    if (!f?.compressed) return
-    const ext = f.compressed.mime.split('/')[1].replace('jpeg','jpg')
-    const name = f.file.name.replace(/\.[^.]+$/, '') + '_compressed.' + ext
-    const a = document.createElement('a')
-    a.href = f.compressed.url
-    a.download = name
-    a.click()
-  }
+function updateQualityLabel() {
+  document.getElementById('qualityVal').textContent = document.getElementById('quality').value + '%';
+}
 
-  function compareOne(id) {
-    const f = files.find(x => x.id == id)
-    if (!f?.compressed) return
-    const modal = document.getElementById('compareModal')
-    const content = document.getElementById('compareContent')
-    const origUrl = URL.createObjectURL(f.file)
-    const origSize = formatBytes(f.originalSize)
-    const compSize = formatBytes(f.compressed.size)
-    const pct = Math.round((1 - f.compressed.size / f.originalSize) * 100)
-    content.innerHTML = `
-      <div class="compare-side">
-        <img src="${origUrl}" alt="原图">
-        <div class="label">原图</div>
-        <div class="size">${origSize}</div>
-        <div style="color:var(--muted);font-size:12px">${f.file.name}</div>
-      </div>
-      <div style="display:flex;align-items:center;font-size:32px;color:var(--accent2)">&#10142;</div>
-      <div class="compare-side">
-        <img src="${f.compressed.url}" alt="压缩后">
-        <div class="label">压缩后</div>
-        <div class="size" style="color:var(--accent2)">${compSize}</div>
-        <div style="color:var(--accent2);font-size:13px;font-weight:600">节省 ${pct}%</div>
-      </div>
-    `
-    modal.classList.add('active')
-  }
-
-  function closeModal() {
-    document.getElementById('compareModal').classList.remove('active')
-  }
-
-  function removeOne(id) {
-    const idx = files.findIndex(x => x.id == id)
-    if (idx === -1) return
-    if (files[idx].status === 'done') {
-      totalSavedBytes -= files[idx].originalSize - files[idx].compressed.size
-      totalOriginalBytes -= files[idx].originalSize
-    }
-    files.splice(idx, 1)
-    renderQueue()
-  }
-
-  function resetAll() {
-    files.length = 0
-    totalSavedBytes = 0
-    totalOriginalBytes = 0
-    renderQueue()
-  }
-
-  function updateQualityLabel() {
-    document.getElementById('qualityVal').textContent = document.getElementById('quality').value + '%'
-  }
-
-  function updateFormatLabel() {}
-
-  function updateStats() {
-    document.getElementById('totalSaved').textContent = formatBytes(totalSavedBytes)
-    const avg = totalOriginalBytes > 0 ? Math.round((1 - (totalOriginalBytes - totalSavedBytes) / totalOriginalBytes) * 100) : 0
-    document.getElementById('avgRatio').textContent = avg + '%'
-    document.getElementById('fileCount').textContent = files.filter(f => f.status === 'done').length
-  }
-
-  function formatBytes(bytes) {
-    if (!bytes || bytes === 0) return '0 B'
-    const k = 1024
-    const sizes = ['B', 'KB', 'MB', 'GB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(i > 1 ? 2 : 0)) + ' ' + sizes[i]
-  }
-
-  function sleep(ms) { return new Promise(r => setTimeout(r, ms)) }
+function formatBytes(bytes) {
+  if (!bytes || bytes === 0) return '0 B';
+  var k = 1024;
+  var sizes = ['B', 'KB', 'MB', 'GB'];
+  var i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(i > 1 ? 2 : 0)) + ' ' + sizes[i];
+}
 </script>
 </body>
 </html>
