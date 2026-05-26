@@ -109,8 +109,21 @@
       <select id="format"><option value="auto">自动（最优）</option><option value="webp">WebP</option><option value="jpeg">JPEG</option><option value="png">PNG</option><option value="avif">AVIF</option></select>
     </div>
     <div class="control-group">
-      <label>最大宽度</label>
-      <select id="maxWidth"><option value="0">原始尺寸</option><option value="4096">4096px</option><option value="2048" selected>2048px</option><option value="1024">1024px</option><option value="800">800px</option></select>
+      <label><input type="checkbox" id="lockRatio" checked onchange="onRatioLockChange()" style="margin-right:4px">保持比例</label>
+    </div>
+    <div class="control-group">
+      <label>宽度</label>
+      <input type="number" id="resizeW" value="" placeholder="原始" min="1" max="99999" style="width:72px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:13px" oninput="onSizeInput('w')">
+      <select id="presetW" onchange="onPresetChange('w')" style="background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:13px">
+        <option value="">预设</option><option value="4096">4096</option><option value="2048">2048</option><option value="1024">1024</option><option value="800">800</option><option value="400">400</option>
+      </select>
+    </div>
+    <div class="control-group">
+      <label>高度</label>
+      <input type="number" id="resizeH" value="" placeholder="原始" min="1" max="99999" style="width:72px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:13px" oninput="onSizeInput('h')">
+      <select id="presetH" onchange="onPresetChange('h')" style="background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:13px">
+        <option value="">预设</option><option value="4096">4096</option><option value="2048">2048</option><option value="1024">1024</option><option value="800">800</option><option value="400">400</option>
+      </select>
     </div>
     <button class="compress-all" id="compressAllBtn" onclick="compressAll()" disabled>压缩全部文件</button>
   </div>
@@ -230,13 +243,14 @@ function compressAll() {
   if (pending.length === 0) return;
   var quality = parseInt(document.getElementById('quality').value) / 100;
   var format = document.getElementById('format').value;
-  var maxWidth = parseInt(document.getElementById('maxWidth').value);
+  var targetW = parseInt(document.getElementById('resizeW').value) || 0;
+  var targetH = parseInt(document.getElementById('resizeH').value) || 0;
 
   pending.forEach(function(f) { f.status = 'processing'; });
   renderQueue();
 
   var promises = pending.map(function(f) {
-    return compressImage(f.file, quality, format, maxWidth).then(function(result) {
+    return compressImage(f.file, quality, format, targetW, targetH).then(function(result) {
       f.compressed = result;
       f.status = 'done';
       totalSavedBytes += f.originalSize - result.size;
@@ -254,14 +268,21 @@ function compressAll() {
   });
 }
 
-function compressImage(file, quality, format, maxWidth) {
+function compressImage(file, quality, format, targetW, targetH) {
   return loadImage(file).then(function(img) {
     var canvas = document.createElement('canvas');
     var w = img.naturalWidth;
     var h = img.naturalHeight;
-    if (maxWidth > 0 && w > maxWidth) {
-      h = Math.round(h * maxWidth / w);
-      w = maxWidth;
+    if (targetW > 0 || targetH > 0) {
+      if (targetW > 0 && targetH > 0) {
+        w = targetW; h = targetH;
+      } else if (targetW > 0) {
+        h = Math.round(h * targetW / w);
+        w = targetW;
+      } else {
+        w = Math.round(w * targetH / h);
+        h = targetH;
+      }
     }
     canvas.width = w;
     canvas.height = h;
@@ -369,6 +390,43 @@ function resetAll() {
 
 function updateQualityLabel() {
   document.getElementById('qualityVal').textContent = document.getElementById('quality').value + '%';
+}
+
+// ---- Size controls ----
+var _lastW = 0, _lastH = 0;
+function onSizeInput(src) {
+  var lock = document.getElementById('lockRatio').checked;
+  var wEl = document.getElementById('resizeW');
+  var hEl = document.getElementById('resizeH');
+  var w = parseInt(wEl.value) || 0;
+  var h = parseInt(hEl.value) || 0;
+  if (lock && _lastW > 0 && _lastH > 0) {
+    if (src === 'w' && w > 0 && w !== _lastW) {
+      hEl.value = Math.round(h * w / _lastW);
+    } else if (src === 'h' && h > 0 && h !== _lastH) {
+      wEl.value = Math.round(w * h / _lastH);
+    }
+  }
+  if (w > 0) _lastW = w;
+  if (h > 0) _lastH = h;
+  if (w === 0) { _lastW = 0; _lastH = 0; }
+  if (h === 0) { _lastW = 0; _lastH = 0; }
+  document.getElementById('presetW').value = '';
+  document.getElementById('presetH').value = '';
+}
+
+function onPresetChange(src) {
+  var sel = document.getElementById(src === 'w' ? 'presetW' : 'presetH');
+  var inp = document.getElementById(src === 'w' ? 'resizeW' : 'resizeH');
+  if (sel.value) {
+    inp.value = sel.value;
+    onSizeInput(src);
+  }
+}
+
+function onRatioLockChange() {
+  _lastW = parseInt(document.getElementById('resizeW').value) || 0;
+  _lastH = parseInt(document.getElementById('resizeH').value) || 0;
 }
 
 function formatBytes(bytes) {
